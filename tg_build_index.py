@@ -13,6 +13,14 @@ logging.getLogger('urllib3').setLevel(logging.INFO)
 CONFIG_INDEX_NAME = "tg_archive_config"
 DATA_INDEX_NAME = "tg_archive_data"
 
+def validate_file(zip, filename):
+    try:
+        zip.getinfo(filename)
+    except KeyError:
+        logging.error("File name %s is missing" % (filename))
+        return "broken"
+    return filename
+
 def index_zip(filename, es_client):
     logging.info("Processing file %s" % filename)
     with zipfile.ZipFile(filename, 'r') as archive:
@@ -42,10 +50,11 @@ def index_zip(filename, es_client):
                         for text in message['text']:
                             if type(text) == str:
                                 texts.append(text)
-                            if type(text) == {} and 'text' in text:
-                                texts.append(text)
-                            if type(text) == {} and 'href' in text:
-                                links.append(text)
+                            else:
+                                if 'text' in text:
+                                    texts.append(text['text'])
+                                if 'href' in text:
+                                    links.append(text['href'])
                     else:
                         raise Exception("Unsupported text block type: %s" % message['text'])
 
@@ -53,14 +62,14 @@ def index_zip(filename, es_client):
                     message_doc['media_type'] = message['media_type']
                     if message['media_type'] in ['video_file', 'video_message', 'animation']:
                         message_doc['mime_type'] = message['mime_type']
-                        message_doc['file'] = message['file']
-                        message_doc['thumbnail'] = message.get('thumbnail', None)
+                        message_doc['file'] = validate_file(archive, message['file'])
+                        message_doc['thumbnail'] = validate_file(archive, message.get('thumbnail', None))
                         message_doc['duration_seconds'] = message.get('duration_seconds', None)
                         message_doc['width'] = message['width']
                         message_doc['height'] = message['height']
                     elif message['media_type'] in ['audio_file', 'voice_message']:
                         message_doc['mime_type'] = message['mime_type']
-                        message_doc['file'] = message['file']
+                        message_doc['file'] = validate_file(archive, message['file'])
                         texts.append(message.get('title', ''))
                         message_doc['duration_seconds'] = message['duration_seconds']
                     elif message['media_type'] == 'sticker':
@@ -72,13 +81,13 @@ def index_zip(filename, es_client):
                         raise Exception("Media type not supported: %s" % message)
 
                 if 'photo' in message:
-                    message_doc['photo'] = message['photo']
+                    message_doc['photo'] = validate_file(archive, message['photo'])
                     assert 'width' not in message_doc
                     message_doc['width'] = message['width']
                     message_doc['height'] = message['height']
 
 
-                message_doc['text'] = "\n".join(texts).strip()
+                message_doc['text'] = "\n".join(list(map(lambda x: x.strip(), texts))).strip()
                 if len(links) > 0:
                     message_doc['links'] = links
 

@@ -54,6 +54,7 @@ function App() {
                               getOptionLabel={site => site?.name}
                               onChange={(event, newValue) => {
                                 if (sites.includes(newValue)) {
+                                  setMessages([]);
                                   setCurrentSite(newValue);
                                 } else {
                                   setCurrentSite(undefined);
