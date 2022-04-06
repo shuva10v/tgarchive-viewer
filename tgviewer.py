@@ -47,6 +47,7 @@ class SearchRequest(BaseModel):
     site_id: Optional[str] = None
     query: str
     sort: str
+    skip: Optional[int] = None
 
 @app.post("/search")
 async def search(req: SearchRequest):
@@ -84,14 +85,16 @@ async def search(req: SearchRequest):
         },
         query=query,
         sort=sort,
-        size=10
+        size=10,
+        from_=req.skip
     )
     def format_message(x):
         obj = x['_source']
         obj['id'] = x['_id']
         return obj
 
-    return list(map(format_message, resp['hits']['hits']))
+    total = resp['hits']['total']['value']
+    return {'total': total, 'messages': list(map(format_message, resp['hits']['hits']))}
 
 @app.get("/content/{site_id}/{media_type}/{media_name}")
 async def list_sites(site_id, media_type, media_name):
