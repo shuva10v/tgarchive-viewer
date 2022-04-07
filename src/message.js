@@ -27,7 +27,6 @@ function Message(props: React.PropsWithChildren) {
 	let text = props.message.text === undefined ? '' : props.message.text;
 	if (props.message.highlight !== undefined) {
 		props.message.highlight.forEach(highlight => {
-				console.log("ta", text);
 				text = text.replace(highlight.replaceAll("<em>", "").replaceAll("</em>", ""), highlight)
 		})
 	}

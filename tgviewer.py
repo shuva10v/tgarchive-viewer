@@ -47,6 +47,7 @@ class SearchRequest(BaseModel):
     query: str
     sort: str
     skip: Optional[int] = None
+    min_date: Optional[str] = None
 
 @app.post("/search")
 async def search(req: SearchRequest):
