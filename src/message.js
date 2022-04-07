@@ -12,7 +12,7 @@ function MediaWrapper(props: React.PropsWithChildren) {
 		</Tooltip>)
 	}
 	const img = <img alt={props.path} src={API_ROOT + '/content/' + props.site_id + '/' + props.path}
-									 sx={{height: '100%', width: '100%', objectFit: 'contain'}}
+									 style={{height: '100%', width: '100%', maxWidth: '400px' ,objectFit: 'contain'}}
 	/>
 	if (props.file !== undefined) {
 		return (<Box>
