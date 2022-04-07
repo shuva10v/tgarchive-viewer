@@ -72,7 +72,7 @@ def index_zip(filename, es_client):
                         message_doc['mime_type'] = message['mime_type']
                         message_doc['file'] = validate_file(archive, message['file'])
                         texts.append(message.get('title', ''))
-                        message_doc['duration_seconds'] = message['duration_seconds']
+                        message_doc['duration_seconds'] = message.get('duration_seconds', None)
                     elif message['media_type'] == 'sticker':
                         if 'text' not in message_doc:
                             message_doc['text'] = ''

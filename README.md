@@ -31,7 +31,7 @@ docker build --platform linux/amd64 -t tgarchive-frontend -f frontend.Dockerfile
 ## Deployment
 
 Download Telegram archives in zip format to ./zipfile directory. 
-Index all directory or specific files:
+Index all directory or specific files (If you have an error on first run, wait for a couple of minutes and retry):
 ```
 docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles/ http://elasticsearch:9200
 ```

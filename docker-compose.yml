@@ -10,7 +10,7 @@ services:
     networks:
       - es_net
     volumes:
-      - ./es_data:/usr/share/elasticsearch/data
+      - es_data:/usr/share/elasticsearch/data
 #  kibana:
 #    image: kibana:7.17.2
 #    ports:
