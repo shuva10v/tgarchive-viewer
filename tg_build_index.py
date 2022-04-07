@@ -66,8 +66,8 @@ def index_zip(filename, es_client):
                         message_doc['file'] = validate_file(archive, message['file'])
                         message_doc['thumbnail'] = validate_file(archive, message.get('thumbnail', None))
                         message_doc['duration_seconds'] = message.get('duration_seconds', None)
-                        message_doc['width'] = message['width']
-                        message_doc['height'] = message['height']
+                        message_doc['width'] = message.get('width', None)
+                        message_doc['height'] = message.get('height', None)
                     elif message['media_type'] in ['audio_file', 'voice_message']:
                         message_doc['mime_type'] = message['mime_type']
                         message_doc['file'] = validate_file(archive, message['file'])
@@ -84,8 +84,8 @@ def index_zip(filename, es_client):
                 if 'photo' in message:
                     message_doc['photo'] = validate_file(archive, message['photo'])
                     assert 'width' not in message_doc
-                    message_doc['width'] = message['width']
-                    message_doc['height'] = message['height']
+                    message_doc['width'] = message.get('width', None)
+                    message_doc['height'] = message.get('height', None)
 
 
                 message_doc['text'] = "\n".join(list(map(lambda x: x.strip(), texts))).strip()

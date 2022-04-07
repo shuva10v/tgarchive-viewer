@@ -2,8 +2,8 @@ version: "3.9"
 services:
   elasticsearch:
     image: elasticsearch:7.17.2
-    ports:
-      - "9200:9200"
+#    ports:
+#      - "9200:9200"
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
@@ -11,16 +11,16 @@ services:
       - es_net
     volumes:
       - ./es_data:/usr/share/elasticsearch/data
-  kibana:
-    image: kibana:7.17.2
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - es_net
+#  kibana:
+#    image: kibana:7.17.2
+#    ports:
+#      - "5601:5601"
+#    depends_on:
+#      - elasticsearch
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#    networks:
+#      - es_net
   backend:
     image: tgarchive-backend:latest
     environment:
@@ -29,10 +29,10 @@ services:
       - es_net
     depends_on:
       - elasticsearch
-  frontend:
-    image: tgarchive-frontend:latest
     volumes:
       - ./zipfiles:/data/zipfiles
+  frontend:
+    image: tgarchive-frontend:latest
     ports:
       - "80:80"
     networks:
@@ -42,3 +42,5 @@ services:
 networks:
   es_net:
     driver: bridge
+volumes:
+  es_data:

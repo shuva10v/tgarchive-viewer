@@ -13,11 +13,13 @@ On first run one should index zip files from tgarc. Only text content are indexe
 remains in zip files and served directly by backend app. 
 
 ## Build
+
+Prerequisites: `docker`, `docker-compose`, `npm`.
                    
 Build frontend:
 ```
 npm install 
-npm run build
+REACT_APP_API_ROOT=/api npm run build
 ```
 
 Build docker images:
@@ -27,6 +29,19 @@ docker build --platform linux/amd64 -t tgarchive-frontend -f frontend.Dockerfile
 ```
 
 ## Deployment
+
+Download Telegram archives in zip format to ./zipfile directory. 
+Index all directory or specific files:
+```
+docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles/ http://elasticsearch:9200
+```
+
+Start docker-compose:
+```
+docker-compose up -d
+```
+
+
 
 
 
