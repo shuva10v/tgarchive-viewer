@@ -1,5 +1,6 @@
 import {Box, Container, Tooltip, Typography} from "@mui/material";
 import ErrorIcon from '@mui/icons-material/Error';
+import parse from 'html-react-parser';
 import React from 'react';
 
 const API_ROOT = 'http://localhost:8000'
@@ -23,6 +24,15 @@ function MediaWrapper(props: React.PropsWithChildren) {
 }
 
 function Message(props: React.PropsWithChildren) {
+	let text = props.message.text === undefined ? '' : props.message.text;
+	if (props.message.highlight !== undefined) {
+		props.message.highlight.forEach(highlight => {
+				console.log("ta", text);
+				text = text.replace(highlight.replaceAll("<em>", "").replaceAll("</em>", ""), highlight)
+		})
+
+	}
+
 	return (
 		<Box>
 			<Box pb={1}>
@@ -32,7 +42,13 @@ function Message(props: React.PropsWithChildren) {
 				</Container>
 			</Box>
 			<Box>
-				<Typography>{props.message.text}</Typography>
+				<Typography className="highlighted_text">{parse(text, (tag) => {
+					if (tag.name == 'em') {
+						return tag;
+					} else {
+						return null;
+					}
+				})}</Typography>
 			</Box>
 			
 			{props.message.photo === undefined ? (null) : (
@@ -49,8 +65,8 @@ function Message(props: React.PropsWithChildren) {
 				/>
 			)}
 			{props.message.links === undefined ? (null): (
-				props.message.links.map((link, idx) => (<Box>
-					<a key={idx} href={link} target="_blank" rel="noreferrer">{link}</a>
+				props.message.links.map((link, idx) => (<Box key={idx}>
+					<a href={link} target="_blank" rel="noreferrer">{link}</a>
 				</Box>))
 			)}
 		</Box>

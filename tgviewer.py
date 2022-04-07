@@ -80,7 +80,9 @@ async def search(req: SearchRequest):
         index=DATA_INDEX_NAME,
         highlight={
             "fields": {
-                "text": {}
+                "text": {
+                    'fragmenter': 'simple'
+                }
             }
         },
         query=query,
@@ -91,9 +93,12 @@ async def search(req: SearchRequest):
     def format_message(x):
         obj = x['_source']
         obj['id'] = x['_id']
+        if 'highlight' in x:
+            obj['highlight'] = x['highlight']['text']
         return obj
 
     total = resp['hits']['total']['value']
+
     return {'total': total, 'messages': list(map(format_message, resp['hits']['hits']))}
 
 @app.get("/content/{site_id}/{media_type}/{media_name}")

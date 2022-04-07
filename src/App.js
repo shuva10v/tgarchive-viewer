@@ -5,7 +5,7 @@ import {
   Autocomplete,
   Box, Button,
   CircularProgress,
-  Container, Input, styled,
+  Container, FormControl, FormControlLabel, FormLabel, Input, Radio, RadioGroup, styled,
   TextField,
   Toolbar,
   Typography
@@ -70,7 +70,7 @@ const StyledInputBase = styled(Input)(({ theme }) => ({
     transition: theme.transitions.create('width'),
     width: '100%',
     '&::placeholder': {
-      color: 'blue'
+      color: 'white'
     },
     [theme.breakpoints.up('md')]: {
       width: '40ch',
@@ -86,6 +86,7 @@ function App() {
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState(undefined);
   const inputRef = useRef();
+  const [sortType, setSortType] = useState("date")
 
   useEffect(() => {
     if (sites === undefined) {
@@ -98,7 +99,7 @@ function App() {
   useEffect(() => {
     const request = {
       site_id: currentSite?.id,
-      sort: 'date',
+      sort: sortType,
       query: searchQuery === undefined ? '*': searchQuery,
       skip: skip
     }
@@ -114,13 +115,12 @@ function App() {
         setTotal(res.total)
         setMessages(res.messages);
       })
-  }, [currentSite, skip, searchQuery])
+  }, [currentSite, skip, searchQuery, sortType])
 
   return (
     <div className="App">
       <AppBar position="static" style={{ background: 'transparent'}}>
-				<Container maxWidth="xl">
-          <Toolbar disableGutters>
+          <Toolbar>
             <Box p={1}>
               {sites === undefined ? (<CircularProgress color="secondary"/>) : (
                 <Autocomplete options={sites}
@@ -140,14 +140,6 @@ function App() {
                                 <TextField {...params} label="Выбор канала"/>}/>
               )}
             </Box>
-            <Box p={1}>
-              {skip > 0 ? (
-                <Button onClick={() => setSkip(skip - PAGE)}>Более новые</Button>
-              ) : (null)}
-              {total > 0 & skip + PAGE < total ? (
-                <Button onClick={() => setSkip(skip + PAGE)}>Более старые</Button>
-              ) : (null)}
-            </Box>
 
             <Box p={1}>
               <Search>
@@ -160,21 +152,51 @@ function App() {
                   inputRef={inputRef}
                   onKeyUp={(e) => {
                   if (e.keyCode === 13) {
-                    setSearchQuery(e.target.value)
+                    setSkip(0);
+                    setSearchQuery(e.target.value);
+                    setSortType("relevance");
                   }
                 }}
                 />
                 <CloseIconWrapper onClick={() => {
                   setSkip(0);
                   setSearchQuery(undefined);
+                  setSortType("date")
                   inputRef.current.value = '';
                 }}>
                   <ClearIcon/>
                 </CloseIconWrapper>
               </Search>
             </Box>
+            <Box p={1} sx={{color:'black'}}>
+              <FormControl>
+                <FormLabel>Сортировка</FormLabel>
+                <RadioGroup row name="sort_order"
+                            value={sortType}
+                            onChange={(e) => setSortType(e.target.value)}
+                >
+                  <FormControlLabel value="date" control={<Radio />} label="В хронологическом порядке" />
+                  <FormControlLabel value="relevance" control={<Radio />} label="Наиболее релевантные" disabled={searchQuery === undefined}/>
+                </RadioGroup>
+              </FormControl>
+            </Box>
+
+            <Box p={1} sx={{color:'black'}}>
+              <Typography>
+                {total === 0 ? ("ничего не найдено") : total === 10000 ? "Более 10 тыс." : `Найдено: ${total}` }
+              </Typography>
+            </Box>
+            <Box sx={{ flexGrow: 1 }}/>
+
+            <Box p={1}>
+              {skip > 0 ? (
+                <Button onClick={() => setSkip(skip - PAGE)}>Более новые</Button>
+              ) : (null)}
+              {total > 0 & skip + PAGE < total ? (
+                <Button onClick={() => setSkip(skip + PAGE)}>Более старые</Button>
+              ) : (null)}
+            </Box>
           </Toolbar>
-        </Container>
       </AppBar>
       {sites !== undefined ? (
         <Box p={5}>

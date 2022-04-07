@@ -1,3 +1,7 @@
 .App {
   text-align: left;
 }
+
+.highlighted_text em {
+  background-color: yellow;
+}
