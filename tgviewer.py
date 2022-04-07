@@ -32,12 +32,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000"], # for development purposes
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/sites")
 async def list_sites():

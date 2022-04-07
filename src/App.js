@@ -5,7 +5,7 @@ import {
   Autocomplete,
   Box, Button,
   CircularProgress,
-  Container, FormControl, FormControlLabel, FormLabel, Input, Radio, RadioGroup, styled,
+  FormControl, FormControlLabel, FormLabel, Input, Radio, RadioGroup, styled,
   TextField,
   Toolbar,
   Typography
@@ -15,7 +15,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import {useEffect, useRef, useState} from "react";
 import Message from "./message";
 
-const API_ROOT = 'http://localhost:8000'
+const API_ROOT = process.env.REACT_APP_API_ROOT;
 const PAGE = 10
 
 const Search = styled('div')(({ theme }) => ({
@@ -175,8 +175,8 @@ function App() {
                             value={sortType}
                             onChange={(e) => setSortType(e.target.value)}
                 >
-                  <FormControlLabel value="date" control={<Radio />} label="В хронологическом порядке" />
-                  <FormControlLabel value="relevance" control={<Radio />} label="Наиболее релевантные" disabled={searchQuery === undefined}/>
+                  <FormControlLabel value="date" disabled={total === 0} control={<Radio />} label="В хронологическом порядке" />
+                  <FormControlLabel value="relevance" control={<Radio />} label="Наиболее релевантные" disabled={searchQuery === undefined || total === 0}/>
                 </RadioGroup>
               </FormControl>
             </Box>
@@ -203,7 +203,7 @@ function App() {
           {messages !== undefined ? (messages.map((message, idx) => (<Message
               key={idx}
               message={message}
-              site_name={currentSite !== undefined ? currentSite.name : sites.filter(site => site.id == message.site_id).shift().name}
+              site_name={currentSite !== undefined ? currentSite.name : sites.filter(site => parseInt(site.id) === parseInt(message.site_id)).shift().name}
             />)
           )) : (null)}
         </Box>

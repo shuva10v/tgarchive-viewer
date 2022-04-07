@@ -21,6 +21,24 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     networks:
       - es_net
+  backend:
+    image: tgarchive-backend:latest
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - es_net
+    depends_on:
+      - elasticsearch
+  frontend:
+    image: tgarchive-frontend:latest
+    volumes:
+      - ./zipfiles:/data/zipfiles
+    ports:
+      - "80:80"
+    networks:
+      - es_net
+    depends_on:
+      - backend
 networks:
   es_net:
     driver: bridge

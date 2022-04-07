@@ -5,6 +5,7 @@ import sys
 import zipfile
 import glob
 import json
+import os
 from elasticsearch import Elasticsearch
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
@@ -103,10 +104,10 @@ def index_zip(filename, es_client):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: %s [source_dir] [elasticsearch_url]" % sys.argv[0])
+        print("Usage: %s [source_dir or zip file] [elasticsearch_url]" % sys.argv[0])
         sys.exit(-1)
 
-    source_dir = sys.argv[1]
+    source = sys.argv[1]
     elasticsearch_url = sys.argv[2]
     es_client = Elasticsearch(elasticsearch_url)
     if es_client.indices.exists(index=CONFIG_INDEX_NAME):
@@ -132,9 +133,12 @@ if __name__ == "__main__":
             })
 
 
-    logging.info("Looking for zip archives in %s" % source_dir)
-    files = glob.glob("%s/*zip" % source_dir)
-    logging.info("Got %s archives" % len(files))
-    # TODO check if file already indexed
-    for file in files:
-        index_zip(file, es_client)
+    if os.path.isdir(source):
+        logging.info("Looking for zip archives in %s" % source)
+        files = glob.glob("%s/*zip" % source)
+        logging.info("Got %s archives" % len(files))
+        # TODO check if file already indexed
+        for file in files:
+            index_zip(file, es_client)
+    else:
+        index_zip(source, es_client)

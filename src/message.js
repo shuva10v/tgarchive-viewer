@@ -3,7 +3,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import parse from 'html-react-parser';
 import React from 'react';
 
-const API_ROOT = 'http://localhost:8000'
+const API_ROOT = process.env.REACT_APP_API_ROOT;
 
 function MediaWrapper(props: React.PropsWithChildren) {
 	if (props.path === 'broken') {
@@ -11,7 +11,7 @@ function MediaWrapper(props: React.PropsWithChildren) {
 			<ErrorIcon sx={{color:'red', fontSize: 40}}/>
 		</Tooltip>)
 	}
-	const img = <img src={API_ROOT + '/content/' + props.site_id + '/' + props.path}
+	const img = <img alt={props.path} src={API_ROOT + '/content/' + props.site_id + '/' + props.path}
 									 sx={{height: '100%', width: '100%', objectFit: 'contain'}}
 	/>
 	if (props.file !== undefined) {
@@ -30,8 +30,9 @@ function Message(props: React.PropsWithChildren) {
 				console.log("ta", text);
 				text = text.replace(highlight.replaceAll("<em>", "").replaceAll("</em>", ""), highlight)
 		})
-
 	}
+
+	text = text.replace("\n", "<br/>")
 
 	return (
 		<Box>
@@ -43,7 +44,7 @@ function Message(props: React.PropsWithChildren) {
 			</Box>
 			<Box>
 				<Typography className="highlighted_text">{parse(text, (tag) => {
-					if (tag.name == 'em') {
+					if (tag.name === 'em') {
 						return tag;
 					} else {
 						return null;
