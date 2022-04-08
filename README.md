@@ -51,7 +51,11 @@ docker-compose up -d
 For development purposes it is better to use such configuration:
 1. Run Elasticsearch and (optionaly) Kibana from [docker-compose-dev.yml](./docker-compose-dev.yml)
 2. Run backend from cli: `ELASTICSEARCH_URL=http://localhost:9200/ uvicorn tgviewer:app --reload` 
-3. Run frontend from IDEA, passing in run `npm start` configuration env vars: `REACT_APP_API_ROOT=http://localhost:8000` 
+3. Run frontend from IDEA, passing in run `npm start` configuration env vars: `REACT_APP_API_ROOT=http://localhost:8000`
+
+## Demo
+
+Demo is available here [https://tgarchive-demo.undo.it/](https://tgarchive-demo.undo.it/)
 
 
 
