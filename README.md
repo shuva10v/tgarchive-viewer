@@ -58,11 +58,10 @@ For development purposes it is better to use such configuration:
 Demo is available here [https://tgarchive-demo.undo.it/](https://tgarchive-demo.undo.it/)
 
 
+## How to export Telegram chat
 
-
-
-
-
+- [Telegram desktop clients for your OS](https://desktop.telegram.org/)
+- [About Telegram Chat Export Tool](https://telegram.org/blog/export-and-more)
 
 
 
