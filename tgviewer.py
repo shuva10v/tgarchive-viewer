@@ -101,6 +101,8 @@ async def get_media(site_id, media_type, media_name):
     logging.info("Requested media %s %s from %s" % (media_type, media_name, site_id))
     filename = index.sites_map[site_id]
 
+    if not filename.startswith("/"):
+        filename = index.working_dir + "/" + filename
     with zipfile.ZipFile(filename, 'r') as archive:
         with archive.open("%s/%s" % (media_type, media_name)) as src:
             return Response(content=src.read())

@@ -35,7 +35,7 @@ services:
   frontend:
     image: tgarchive-frontend:latest
     ports:
-      - "80:80"
+      - "8080:80"
     networks:
       - es_net
     depends_on:
