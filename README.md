@@ -40,6 +40,8 @@ Index all directory or specific files (If you have an error on first run, wait f
 docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles/ http://elasticsearch:9200
 ```
 
+Otherwise, one could index archives from admin page (_%base_url%/admin_). 
+
 Or build specific archives like this:
 ```
 docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles/archive_1.zip http://elasticsearch:9200
