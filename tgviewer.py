@@ -2,6 +2,7 @@
 
 import logging
 import os
+import glob
 import asyncio
 import zipfile
 from elasticsearch import AsyncElasticsearch
@@ -15,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 
 elasticsearch_url = os.environ["ELASTICSEARCH_URL"]
+archives_base_dir = os.environ["ARCHIVES_BASE_DIR"]
 es_client = AsyncElasticsearch(elasticsearch_url)
 es_client_sync = Elasticsearch(elasticsearch_url)
 CONFIG_INDEX_NAME = "tg_archive_config"
@@ -109,3 +111,10 @@ async def list_sites(site_id, media_type, media_name):
     with zipfile.ZipFile(filename, 'r') as archive:
         with archive.open("%s/%s" % (media_type, media_name)) as src:
             return Response(content=src.read())
+
+@app.get("/admin/archives")
+async def admin_list_archives():
+    return list(map(lambda x: {
+        'name': os.path.basename(x),
+        'size': os.path.getsize(x)
+    }, glob.glob("%s/*zip" % archives_base_dir)))
