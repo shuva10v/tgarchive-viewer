@@ -4,6 +4,7 @@ COPY requirements.txt /opt/api/
 RUN pip3 install -r /opt/api/requirements.txt
 
 COPY tgviewer.py /opt/api/
+COPY tgindex.py /opt/api/
 COPY tg_build_index.py /opt/api/
 
 EXPOSE 8000

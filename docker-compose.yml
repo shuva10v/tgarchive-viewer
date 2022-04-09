@@ -25,6 +25,7 @@ services:
     image: tgarchive-backend:latest
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ARCHIVES_BASE_DIR=/data/zipfiles/
     networks:
       - es_net
     depends_on:
