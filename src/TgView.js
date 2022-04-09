@@ -80,26 +80,27 @@ const StyledInputBase = styled(Input)(({ theme }) => ({
   },
 }));
 
-function handleErrors(response) {
-  if (!response.ok) {
-    throw Error(response.statusText);
-  }
-  return response;
-}
-
 function TgView() {
   const alert = useAlert();
   const [sites, setSites] = useState(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState([]);
-  const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState(undefined);
   const inputRef = useRef();
   const [sortType, setSortType] = useState("date")
 
+  function updateSearchParams(action) {
+    action(searchParams)
+    setSearchParams(searchParams)
+  }
+
   function currentSiteId() {
-    return searchParams.get("site_id") || undefined
+    return parseInt(searchParams.get("site_id")) || undefined;
+  }
+
+  function skip() {
+    return parseInt(searchParams.get("skip")) || 0;
   }
 
   function currentSite() {
@@ -121,7 +122,7 @@ function TgView() {
       site_id: currentSiteId(),
       sort: sortType,
       query: searchQuery === undefined ? '*': searchQuery,
-      skip: skip
+      skip: skip()
     }
     // console.log(request)
     fetch(API_ROOT + '/search', {
@@ -137,7 +138,7 @@ function TgView() {
         setMessages(res.messages);
       })
       .catch(error => alert.show("Ошибка при выполнении запроса: " + error));
-  }, [searchParams, skip, searchQuery, sortType])
+  }, [searchParams, searchQuery, sortType])
 
   if (sites === undefined) {
     return <CircularProgress color="secondary"/>;
@@ -176,14 +177,14 @@ function TgView() {
                 inputRef={inputRef}
                 onKeyUp={(e) => {
                   if (e.keyCode === 13) {
-                    setSkip(0);
+                    setSearchParams({'skip': 0})
                     setSearchQuery(e.target.value);
                     setSortType("relevance");
                   }
                 }}
               />
               <CloseIconWrapper onClick={() => {
-                setSkip(0);
+                setSearchParams({'skip': 0})
                 setSearchQuery(undefined);
                 setSortType("date")
                 inputRef.current.value = '';
@@ -214,11 +215,11 @@ function TgView() {
           <Box sx={{ flexGrow: 1 }}/>
 
           <Box p={1}>
-            {skip > 0 ? (
-              <Button onClick={() => setSkip(skip - PAGE)}>Более новые</Button>
+            {skip() > 0 ? (
+              <Button onClick={() => updateSearchParams(params => params.set('skip', skip() - PAGE))}>Более новые</Button>
             ) : (null)}
-            {total > 0 & skip + PAGE < total ? (
-              <Button onClick={() => setSkip(skip + PAGE)}>Более старые</Button>
+            {total > 0 & skip() + PAGE < total ? (
+              <Button onClick={() => updateSearchParams(params => params.set('skip', skip() + PAGE))}>Более старые</Button>
             ) : (null)}
           </Box>
 
