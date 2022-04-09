@@ -86,9 +86,7 @@ function TgView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState([]);
   const [total, setTotal] = useState(0);
-  const [searchQuery, setSearchQuery] = useState(undefined);
   const inputRef = useRef();
-  const [sortType, setSortType] = useState("date")
 
   function updateSearchParams(action) {
     action(searchParams)
@@ -96,11 +94,21 @@ function TgView() {
   }
 
   function currentSiteId() {
-    return parseInt(searchParams.get("site_id")) || undefined;
+    const site_id = searchParams.get("site_id");
+    return site_id ? parseInt(site_id) : undefined;
+  }
+
+  function searchQuery() {
+    return searchParams.get("query") || undefined;
+  }
+
+  function sortType() {
+    return searchParams.get("sort") || "date";
   }
 
   function skip() {
-    return parseInt(searchParams.get("skip")) || 0;
+    const skip = searchParams.get("skip");
+    return skip ? parseInt(skip) : 0;
   }
 
   function currentSite() {
@@ -120,8 +128,8 @@ function TgView() {
   useEffect(() => {
     const request = {
       site_id: currentSiteId(),
-      sort: sortType,
-      query: searchQuery === undefined ? '*': searchQuery,
+      sort: sortType(),
+      query: searchQuery() === undefined ? '*': searchQuery(),
       skip: skip()
     }
     // console.log(request)
@@ -138,7 +146,7 @@ function TgView() {
         setMessages(res.messages);
       })
       .catch(error => alert.show("Ошибка при выполнении запроса: " + error));
-  }, [searchParams, searchQuery, sortType])
+  }, [searchParams])
 
   if (sites === undefined) {
     return <CircularProgress color="secondary"/>;
@@ -156,9 +164,15 @@ function TgView() {
                           onChange={(event, newValue) => {
                             if (sites.includes(newValue)) {
                               setMessages([]);
-                              setSearchParams({'site_id': newValue.id})
+                              updateSearchParams(params => {
+                                params.set('site_id', newValue.id);
+                                params.delete('skip');
+                              });
                             } else {
-                              setSearchParams({})
+                              updateSearchParams(params => {
+                                params.delete('site_id');
+                                params.delete('skip');
+                              })
                               setMessages([]);
                             }
                           }}
@@ -175,18 +189,23 @@ function TgView() {
                 placeholder="Введите запрос и нажмите Enter"
                 inputProps={{ 'aria-label': 'search' }}
                 inputRef={inputRef}
+                defaultValue={searchQuery()}
                 onKeyUp={(e) => {
                   if (e.keyCode === 13) {
-                    setSearchParams({'skip': 0})
-                    setSearchQuery(e.target.value);
-                    setSortType("relevance");
+                    updateSearchParams(params => {
+                      params.delete('skip');
+                      params.set('query', e.target.value);
+                      params.set('sort', 'relevance');
+                    })
                   }
                 }}
               />
               <CloseIconWrapper onClick={() => {
-                setSearchParams({'skip': 0})
-                setSearchQuery(undefined);
-                setSortType("date")
+                updateSearchParams(params => {
+                  params.delete('skip');
+                  params.delete('query');
+                  params.set('sort', 'date');
+                })
                 inputRef.current.value = '';
               }}>
                 <ClearIcon/>
@@ -198,11 +217,11 @@ function TgView() {
             <FormControl>
               <FormLabel>Сортировка</FormLabel>
               <RadioGroup row name="sort_order"
-                          value={sortType}
-                          onChange={(e) => setSortType(e.target.value)}
+                          value={sortType()}
+                          onChange={(e) => updateSearchParams(params => params.set('sort', e.target.value))}
               >
                 <FormControlLabel value="date" disabled={total === 0} control={<Radio />} label="В хронологическом порядке" />
-                <FormControlLabel value="relevance" control={<Radio />} label="Наиболее релевантные" disabled={searchQuery === undefined || total === 0}/>
+                <FormControlLabel value="relevance" control={<Radio />} label="Наиболее релевантные" disabled={searchQuery() === undefined || total === 0}/>
               </RadioGroup>
             </FormControl>
           </Box>
