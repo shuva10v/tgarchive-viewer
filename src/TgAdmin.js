@@ -7,7 +7,7 @@ import {
 	TableCell,
 	TableContainer,
 	TableHead,
-	TableRow,
+	TableRow, TextField,
 	Typography
 } from "@mui/material";
 import {useEffect, useState} from "react";
@@ -20,6 +20,8 @@ const REFRESH_INTERVAL = 1000;
 function TgAdmin() {
 	const [archives, setArchives] = useState(undefined);
 	const [sites, setSites] = useState(undefined);
+	const [url, setUrl] = useState(undefined);
+	const [filename, setFilename] = useState(undefined);
 
 	const alert = useAlert();
 
@@ -55,6 +57,21 @@ function TgAdmin() {
 			.then(() => {
 				alert.show("Запущена переиндексация")
 				setTimeout(() => setArchives(undefined), REFRESH_INTERVAL);
+			})
+			.catch(error => alert.show("Ошибка при выполнении запроса: " + error));
+	}
+
+	function startUpload(url, file_name) {
+		fetch(API_ROOT + '/admin/download', {
+			method: 'POST',
+			body: JSON.stringify({url: url, file_name: file_name}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+			.then(response => response.json())
+			.then(() => {
+				alert.show("Запущена закачка")
 			})
 			.catch(error => alert.show("Ошибка при выполнении запроса: " + error));
 	}
@@ -118,6 +135,27 @@ function TgAdmin() {
 					</TableBody>
 				</Table>
 			</TableContainer>
+		</Box>
+
+		<Box p={1}>
+			<Typography variant="h6">Загрузка файла</Typography>
+			<Box p={1}>
+				<TextField
+					variant="outlined"
+					label="URL адрес для загрузки"
+					sx={{width: "600px"}}
+					onChange={(e) => setUrl(e.target.value)}/>
+			</Box>
+			<Box p={1}>
+				<TextField
+					variant="outlined"
+					label="Имя файла"
+					onChange={(e) => setFilename(e.target.value)}/>
+			</Box>
+			<Box pt={2}>
+				<Button onClick={() => startUpload(url, filename)} variant="outlined">Запустить закачку</Button>
+			</Box>
+
 		</Box>
 	</Box>)
 }

@@ -44,6 +44,10 @@ class SearchRequest(BaseModel):
 class IndexRequest(BaseModel):
     file_name: str
 
+class UploadRequest(BaseModel):
+    url: str
+    file_name: str
+
 @app.post("/search")
 async def search(req: SearchRequest):
     query = {"bool": {}}
@@ -119,10 +123,6 @@ async def admin_list_archives():
 async def admin_reindex(req: IndexRequest):
     index.index_background(req.file_name)
 
-@app.post("/admin/upload")
-async def admin_upload_file(file: UploadFile):
-    full_path = "%s/%s" % (index.working_dir, file.file_name)
-    if os.path.exists(full_path):
-        raise Exception("Path already exists")
-    with open(full_path, "wb+") as file_object:
-        shutil.copyfileobj(uploaded_file.file, file_object)
+@app.post("/admin/download")
+async def admin_download(req: UploadRequest):
+    index.download(req.url, req.file_name)

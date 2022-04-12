@@ -7,6 +7,7 @@ import zipfile
 import json
 from threading import Thread
 import traceback
+import requests
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 logging.getLogger('urllib3').setLevel(logging.INFO)
@@ -55,6 +56,7 @@ class TgIndex:
         self.sync_config()
 
     def sync_config(self):
+        logging.info("Updating sites list")
         resp = self.es_client_sync.search(
             index=TgIndex.CONFIG_INDEX_NAME,
             query={"match_all": {}},
@@ -71,6 +73,31 @@ class TgIndex:
         else:
             logging.info("System is busy")
             raise SystemBusyException()
+
+    def download(self, url, file_name):
+        if self.thread is None or not self.thread.is_alive():
+            self.thread = Thread(target=self._download_url, args=(url, file_name,), daemon=True)
+            self.thread.start()
+        else:
+            logging.info("System is busy")
+            raise SystemBusyException()
+
+    def _download_url(self, url, file_name):
+        logging.info("Processing download %s to %s"  % (url, file_name))
+        try:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                self.index_info[file_name] = {'state': 'downloading'}
+                with open("%s/%s" % (self.working_dir, file_name), 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                self.index_info[file_name] = {'state': 'downloaded'}
+        except:
+            logging.info("Unable to download")
+            tb = traceback.format_exc()
+            logging.error("Indexation failed", tb)
+            self.index_info[file_name] = {'state': 'download failed'}
+
 
     def _index_zip(self, filename):
         logging.info("Processing file %s" % filename)
