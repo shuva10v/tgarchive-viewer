@@ -41,8 +41,16 @@ docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles
 ```
 
 Otherwise, one could index archives from admin page (_%base_url%/#/admin_). 
+For publicly available site protect admin page with nginx basic auth:
+1. generate password file: `` htpasswd -c .htpasswd admin``
+2. override nginx config in docker-compose.yml, add two files in ``frontend`` service section:
+```
+    volumes:
+      - .htpasswd:/etc/nginx/.htpasswd
+      - ./nginx_production.conf:/etc/nginx/conf.d/default.conf
+```
 
-Or build specific archives like this:
+Otherwise, one could index specific archives like this:
 ```
 docker-compose run --rm backend python /opt/api/tg_build_index.py /data/zipfiles/archive_1.zip http://elasticsearch:9200
 ```
